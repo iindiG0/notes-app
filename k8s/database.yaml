@@ -1,0 +1,20 @@
+# k8s/database.yaml
+# A PostgreSQL database managed by CloudNativePG (already installed in your cluster).
+# CNPG automatically creates:
+#   - Service  notes-db-rw   -> the database address your app connects to
+#   - Secret   notes-db-app  -> username, password, host, port, dbname for user "app"
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: notes-db
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"   # Create the database first
+spec:
+  instances: 1            # Use 3 for real production (1 primary + 2 replicas, automatic failover)
+  storage:
+    size: 1Gi
+    # storageClass: <your-truenas-class>   # Leave out to use the cluster's default StorageClass
+  bootstrap:
+    initdb:
+      database: app
+      owner: app

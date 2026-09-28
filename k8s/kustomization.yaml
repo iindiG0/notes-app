@@ -1,0 +1,19 @@
+# k8s/kustomization.yaml
+# Bundles all manifests and sets the image tag in ONE place.
+# The pipeline edits newTag on every release.
+# To roll back: set newTag to an older commit SHA and push.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: notes
+
+resources:
+  - config.yaml
+  - database.yaml
+  - migrate-job.yaml
+  - deployment.yaml
+  - network.yaml
+
+images:
+  - name: ghcr.io/iindig0/notes-app   # CHANGE ME if your repo has a different name
+    newTag: "latest"

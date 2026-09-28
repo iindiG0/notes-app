@@ -1,0 +1,20 @@
+# argocd/application.yaml
+# Apply once:  kubectl apply -f argocd/application.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: notes-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/iindiG0/notes-app.git   # CHANGE ME if your repo name differs
+    targetRevision: main
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: notes
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

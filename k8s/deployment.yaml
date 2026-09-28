@@ -1,0 +1,61 @@
+# k8s/deployment.yaml
+# Runs the Laravel app (PHP + Apache) in 2 pods.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-app
+  labels:
+    app: notes-app
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"   # After the migration Job has succeeded
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notes-app
+  template:
+    metadata:
+      labels:
+        app: notes-app
+    spec:
+      # Needed only if the image on ghcr.io is private (see README)
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: web
+          image: ghcr.io/iindig0/notes-app   # Tag is set by kustomization.yaml
+          ports:
+            - containerPort: 80
+          # All non-secret settings from the ConfigMap...
+          envFrom:
+            - configMapRef:
+                name: notes-app-config
+          # ...plus secrets. The DB ones come from the Secret CNPG created for us.
+          env:
+            - name: APP_KEY
+              valueFrom: { secretKeyRef: { name: notes-app-secrets, key: APP_KEY } }
+            - name: DB_HOST
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: host } }
+            - name: DB_PORT
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: port } }
+            - name: DB_DATABASE
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: dbname } }
+            - name: DB_USERNAME
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: username } }
+            - name: DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: password } }
+          # Laravel's built-in health URL
+          readinessProbe:
+            httpGet: { path: /up, port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /up, port: 80 }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi

@@ -1,0 +1,31 @@
+# k8s/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: notes-app
+spec:
+  selector:
+    app: notes-app
+  ports:
+    - port: 80
+      targetPort: 80
+---
+# Exposes the Service outside the cluster on a hostname
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notes-app
+spec:
+  # Check yours with: kubectl get ingressclass   (change if it isn't "nginx")
+  ingressClassName: nginx
+  rules:
+    - host: notes.example.com   # CHANGE ME: a hostname whose DNS points to your ingress
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: notes-app
+                port:
+                  number: 80

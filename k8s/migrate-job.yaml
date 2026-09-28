@@ -1,0 +1,41 @@
+# k8s/migrate-job.yaml
+# Runs "php artisan migrate --force" once per deploy, BEFORE the new pods start.
+# It's an Argo CD "Sync hook": Argo CD recreates it on every sync, waits for it
+# to succeed, and only then continues to the next wave (the Deployment).
+# If the migration fails, the deploy stops and the old version keeps running.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: notes-app-migrate
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation   # Keep the last run so you can read its logs
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  backoffLimit: 10       # Retries, e.g. while the database is still starting on first deploy
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: migrate
+          image: ghcr.io/iindig0/notes-app   # Tag is set by kustomization.yaml
+          command: ["entrypoint.sh"]
+          args: ["php", "artisan", "migrate", "--force"]
+          envFrom:
+            - configMapRef:
+                name: notes-app-config
+          env:
+            - name: APP_KEY
+              valueFrom: { secretKeyRef: { name: notes-app-secrets, key: APP_KEY } }
+            - name: DB_HOST
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: host } }
+            - name: DB_PORT
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: port } }
+            - name: DB_DATABASE
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: dbname } }
+            - name: DB_USERNAME
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: username } }
+            - name: DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: password } }

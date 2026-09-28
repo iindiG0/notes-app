@@ -1,0 +1,20 @@
+# k8s/config.yaml
+# Non-secret settings. These replace the .env file you use on your laptop.
+# Passwords and keys do NOT go here; they come from Secrets (see deployment.yaml).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notes-app-config
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+data:
+  APP_NAME: "Notes"
+  APP_ENV: "production"
+  APP_DEBUG: "false"            # Never true in production: it shows secrets on error pages
+  APP_URL: "https://notes.example.com"   # CHANGE ME: same host as in ingress.yaml
+  LOG_CHANNEL: "stderr"         # Logs go to `kubectl logs`, not a file inside the pod
+  LOG_LEVEL: "info"
+  DB_CONNECTION: "pgsql"
+  SESSION_DRIVER: "database"    # Sessions in PostgreSQL, so every replica shares them
+  CACHE_STORE: "database"
+  QUEUE_CONNECTION: "sync"
