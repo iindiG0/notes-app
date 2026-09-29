@@ -11,7 +11,8 @@ data:
   APP_NAME: "Notes"
   APP_ENV: "production"
   APP_DEBUG: "false"            # Never true in production: it shows secrets on error pages
-  APP_URL: "https://notes.example.com"   # CHANGE ME: same host as in ingress.yaml
+  #APP_URL: "https://notes.example.com"   # CHANGE ME: same host as in ingress.yaml
+  APP_URL: "http://notes.izzat.local"   # Same host as in network.yaml
   LOG_CHANNEL: "stderr"         # Logs go to `kubectl logs`, not a file inside the pod
   LOG_LEVEL: "info"
   DB_CONNECTION: "pgsql"

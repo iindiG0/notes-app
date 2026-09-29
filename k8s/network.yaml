@@ -19,7 +19,8 @@ spec:
   # Check yours with: kubectl get ingressclass   (change if it isn't "nginx")
   ingressClassName: nginx
   rules:
-    - host: notes.example.com   # CHANGE ME: a hostname whose DNS points to your ingress
+    #- host: notes.example.com   # CHANGE ME: a hostname whose DNS points to your ingress
+    - host: notes.izzat.local   # AD DNS A record -> 10.27.60.80
       http:
         paths:
           - path: /

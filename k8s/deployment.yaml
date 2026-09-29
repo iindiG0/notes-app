@@ -10,6 +10,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"   # After the migration Job has succeeded
 spec:
   replicas: 2
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0   # Keep old pods running until a new one is Ready
+      maxSurge: 1
   selector:
     matchLabels:
       app: notes-app
@@ -21,6 +25,30 @@ spec:
       # Needed only if the image on ghcr.io is private (see README)
       imagePullSecrets:
         - name: ghcr-pull
+      initContainers:
+        - name: migrate
+          image: ghcr.io/iindig0/notes-app   # Tag is set by kustomization.yaml
+          command: ["entrypoint.sh"]
+          args: ["php", "artisan", "migrate", "--force"]
+          envFrom:
+            - configMapRef:
+                name: notes-app-config
+          env:
+            - name: APP_KEY
+              valueFrom: { secretKeyRef: { name: notes-app-secrets, key: APP_KEY } }
+            - name: DB_HOST
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: host } }
+            - name: DB_PORT
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: port } }
+            - name: DB_DATABASE
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: dbname } }
+            - name: DB_USERNAME
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: username } }
+            - name: DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: notes-db-app, key: password } }
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 256Mi }
       containers:
         - name: web
           image: ghcr.io/iindig0/notes-app   # Tag is set by kustomization.yaml
