@@ -9,7 +9,8 @@
 <body>
     <header class="topbar">
         <div class="container topbar-inner">
-            <a href="{{ url('/') }}" class="brand">📝 {{ config('app.name') }}</a>
+            <!-- <a href="{{ url('/') }}" class="brand">📝 {{ config('app.name') }}</a> -->
+            <a href="{{ url('/') }}" class="brand">📝 {{ config('app.name') }} · v2 (deployed by Fleet)</a>
             <nav>
                 @auth
                     <span class="muted">{{ auth()->user()->name }}</span>
