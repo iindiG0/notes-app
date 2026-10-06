@@ -16,4 +16,4 @@ resources:
 
 images:
   - name: ghcr.io/iindig0/notes-app   # CHANGE ME if your repo has a different name
-    newTag: "fea0ad3"
+    newTag: "4666dbb"
