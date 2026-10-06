@@ -3,8 +3,8 @@
 #   1. test    (CI)  run the Laravel test suite against a real PostgreSQL
 #   2. build   (CI)  build the Docker image, push it to GitHub Container Registry
 #   3. release (CD)  write the new image tag into k8s/kustomization.yaml
-#   4. Argo CD, inside your RKE2 cluster, sees the commit and deploys it:
-#        migrate the database (Job)  ->  roll out the new pods (Deployment)
+#   4. Fleet (Rancher), inside your RKE2 cluster, checks Git every 60s and deploys it:
+#        initContainer runs the migration  ->  rolling update of the pods (Deployment)
 
 name: CI/CD
 
